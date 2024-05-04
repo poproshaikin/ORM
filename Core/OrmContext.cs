@@ -45,10 +45,13 @@ public abstract class OrmContext
             
             tableBase.SetQueryBuilder(DbQueryBuilder.GetBuilder(Connector));
             tableBase.InitChangesTracker();
-            _container.AddQuery(
-                tableBase
-                    .QueryBuilder
-                    .CreateTableIfNotExists(config));
+
+            if (!tableBase.Exists())
+            {
+                _container.AddCommand(tableBase
+                                      .QueryBuilder
+                                      .CreateTableIfNotExists(config));
+            }
             
             _tables.Add(tableBase);
             
