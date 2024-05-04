@@ -22,7 +22,7 @@ internal static class TypeExtensions
     /// </summary>
     public static int GetPrimaryKeyValue<T>(this T obj) => 
         Convert.ToInt32(obj.GetType()
-                           .GetProperty(typeof(T).GetPrimaryKeyColumnName()!)
+                           .GetProperty(typeof(T).GetPrimaryKeyName()!)
                            .GetValue(obj));
     
     /// <summary>
@@ -78,5 +78,23 @@ internal static class TypeExtensions
         type.GetProperties()
             .Where(IsPropertyVirtual);
 
-    public static string? GetPrimaryKeyColumnName(this Type type) => type.GetPrimaryKeyInfo()!.Name;
+    public static string? GetPrimaryKeyName(this Type type) => type.GetPrimaryKeyInfo()!.Name;
+
+    /// <summary>
+    /// Returns all PropertyInfo of the type that can be added to the database.
+    /// </summary>
+    /// <returns>A collection of PropertyInfo that do not have a PrimaryKey constraint and are not virtual.</returns>
+    public static IEnumerable<PropertyInfo> GetDbProperties(this Type type)
+    {
+        return type.GetProperties()
+            .Where(p =>
+            {
+                if (p.IsPropertyVirtual()) return false;
+
+                var attr = p.GetCustomAttribute<ConstraintAttribute>();
+                if (attr == null) return true;
+
+                return !attr.Constraints.Contains(DbConstraint.PrimaryKey);
+            });
+    }
 }
