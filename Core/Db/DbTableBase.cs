@@ -36,4 +36,9 @@ public abstract class DbTableBase
 
         TransactionContainer = container;
     }
+
+    internal bool Exists()
+    {
+        return QueryBuilder.ExistsTable(TableName);
+    }
 }
