@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Data.Common;
 using System.Data.SQLite;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -20,7 +21,7 @@ public class SqliteQueryBuilder : DbQueryBuilder
     {
     }
     
-    public override string CreateTableIfNotExists(TableConfig config)
+    public override DbCommand CreateTableIfNotExists(TableConfig config)
     {
         string query = $"CREATE TABLE IF NOT EXISTS {config.Name}(";
 
@@ -64,7 +65,7 @@ public class SqliteQueryBuilder : DbQueryBuilder
 
         query += ")";
 
-        return query;
+        return new SQLiteCommand(query);
     }
 
     public override TEntity? GetEntity<TEntity>(string tableName, int id) where TEntity : class
@@ -99,7 +100,7 @@ public class SqliteQueryBuilder : DbQueryBuilder
 
     public override IEnumerable<TEntity?> GetEntities<TEntity>(string tableName) where TEntity : class
     {
-        var pkName = typeof(TEntity).GetPrimaryKeyColumnName();
+        var pkName = typeof(TEntity).GetPrimaryKeyName();
         
         string sql = $"SELECT {pkName} FROM {tableName}";
 
@@ -120,64 +121,48 @@ public class SqliteQueryBuilder : DbQueryBuilder
         }
     }
 
-    public override string RemoveEntity(string tableName, int id)
+    public override DbCommand RemoveEntity(string tableName, int id)
     {
         var pkColName = this.GetPrimaryKeyColumnName(tableName);
-        return $"DELETE FROM {tableName} WHERE {pkColName} = {id}";
+        return new SQLiteCommand($"DELETE FROM {tableName} WHERE {pkColName} = {id}");
     }
 
-    public override string AddEntity<TEntity>(string tableName, TEntity entity)
+    public override DbCommand AddEntity<TEntity>(string tableName, TEntity entity)
     {
-        var properties = entity.GetType()
-            .GetProperties()
-            .Where(p =>
-            {
-                var attributes = p.GetCustomAttributes() as Attribute[] 
-                                 ?? p.GetCustomAttributes()
-                                     .ToArray();
-                if (attributes.Length != 0)
-                {
-                    var cnsAtr = attributes.ToList()[0] as ConstraintAttribute;
-
-                    return !cnsAtr.Constraints.Contains(DbConstraint.PrimaryKey);
-                }
-
-                return true;
-            });
+        var properties = entity.GetType().GetDbProperties();
         
-        string columns = string.Join(", ", properties.Select(p => p.Name));
-        string values = string.Join(", ", properties.Select(p => $"@{p.Name}"));
-        string sql = $"INSERT INTO {tableName} ({columns}) VALUES ({values})";
+        var columns = properties.Select(p => p.Name);
+        var parameterNames = columns.Select(col => $"@{col}").ToArray();
+        var values = properties.Select(p => p.GetValue(entity)).ToArray();
 
-        using var sqliteCmd = new SQLiteCommand(sql);
+        var columnsJoin = string.Join(", ", columns);
+        var paramsJoin = string.Join(", ", parameterNames);
 
-        foreach (var prop in properties)
+        var command = new SQLiteCommand()
         {
-            sqliteCmd.Parameters.AddWithValue($"@{prop.Name}", prop.GetValue(entity));
+            CommandText = $"INSERT INTO {tableName}({columnsJoin}) VALUES({paramsJoin})"
+        };
+        
+        for (int i = 0; i < properties.Count(); i++)
+        {
+            command.Parameters.AddWithValue(parameterNames[i], values[i]);
         }
 
-        Console.WriteLine("SqliteQueryBuilder method AddEntity()");
-        Console.WriteLine($"Query: {sqliteCmd.CommandText}");
-        
-        return sqliteCmd.CommandText;
+        return command;
     }
 
-    public override IEnumerable<string> UpdateEntity<TEntity>(string tableName, TEntity oldEntity, TEntity newEntity)
+    public override IEnumerable<DbCommand> UpdateEntity<TEntity>(string tableName, TEntity oldEntity, TEntity newEntity) 
     {
         ArgumentNullException.ThrowIfNull(oldEntity);
         ArgumentNullException.ThrowIfNull(newEntity);
         
-        if ((int)oldEntity.GetType()
-                .GetPrimaryKeyInfo()!
-                .GetValue(oldEntity)!
-            !=
-            (int)newEntity.GetType()
-                .GetPrimaryKeyInfo()!
-                .GetValue(newEntity)!)
+        if (oldEntity.GetPrimaryKeyValue() != newEntity.GetPrimaryKeyValue())
             throw new InvalidDataException();
 
-        var oldProps = oldEntity.GetType().GetProperties();
-        var newProps = newEntity.GetType().GetProperties();
+        var oldProps = oldEntity.GetType().GetDbProperties().ToArray();
+        var newProps = oldEntity.GetType().GetDbProperties().ToArray();
+
+        if (oldProps.Length != newProps.Length) throw new InvalidCastException();
 
         for (int i = 0; i < oldProps.Length; i++)
         {
@@ -185,20 +170,17 @@ public class SqliteQueryBuilder : DbQueryBuilder
             var newValue = newProps[i].GetValue(newEntity);
 
             if (oldValue == newValue) continue;
-            
+
             var columnName = oldProps[i].Name;
-            var pkColumnName = this.GetPrimaryKeyColumnName(tableName);
-            
-            var pkValue = oldEntity.GetType()
-                                         .GetPrimaryKeyInfo()!
-                                         .GetValue(oldEntity);
-            var sql =
-                $"UPDATE {tableName} SET {columnName} = @{columnName} WHERE {pkColumnName} = {pkValue}";
+            var pkColumnName = oldEntity.GetType().GetPrimaryKeyName();
+            var pkValue = oldEntity.GetPrimaryKeyValue();
 
-            using var sqliteCmd = new SQLiteCommand();
-            sqliteCmd.Parameters.AddWithValue(columnName, newValue);
+            var sql = $"UPDATE {tableName} SET {columnName} = @{columnName} WHERE {pkColumnName} = {pkValue}";
 
-            yield return sqliteCmd.CommandText;
+            var command = new SQLiteCommand(sql);
+            command.Parameters.AddWithValue($"@{columnName}", newValue);
+
+            yield return command;
         }
     }
 
@@ -231,7 +213,7 @@ public class SqliteQueryBuilder : DbQueryBuilder
         return sw.ToString();
     }
 
-    protected override bool ExistsTable(string tableName)
+    public override bool ExistsTable(string tableName)
     {
         string sql = $"SELECT name FROM sqlite_master WHERE type = 'table'";
 
