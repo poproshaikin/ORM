@@ -34,7 +34,7 @@ public class ColumnConfig
             {
                 ReferencedTableName = fkAtr.ReferencedTableName,
                 ForeignKeyColName = model.Name,
-                ReferencedPrimaryKey = fkAtr.GetType().GetGenericArguments()[0].GetPrimaryKeyColumnName() ??
+                ReferencedPrimaryKey = fkAtr.GetType().GetGenericArguments()[0].GetPrimaryKeyName() ??
                                     throw new MissingPrimaryKeyException()
             };
         }
