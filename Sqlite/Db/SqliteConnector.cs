@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using System.Data.Entity.Core.Common;
 using System.Data.SQLite;
 using ORM_0._3.Core.Db;
 using ORM_0._3.Core.Enums;
@@ -37,7 +38,7 @@ public class SqliteConnector : DbConnector
 
     public override void ExecuteTransaction(Action<DbConnection> trnsAct)
     {
-        using var sqliteTrns = base.Connection.BeginTransaction();
+        using var sqliteTrns = (base.Connection.BeginTransaction() as SQLiteTransaction)!;
 
         try
         {
@@ -68,6 +69,8 @@ public class SqliteConnector : DbConnector
         cmdAct.Invoke(cmd);
         cmd.ExecuteNonQuery();
     }
+
+    public override void ExecuteNonQuery(DbCommand command) => command.ExecuteNonQuery();
 
     public override void ExecuteReader(string query, Action<DbDataReader> rdrAct)
     {
