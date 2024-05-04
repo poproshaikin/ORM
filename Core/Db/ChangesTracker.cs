@@ -15,7 +15,7 @@ public class ChangesTracker<TEntity> where TEntity : class
         _changes = new Dictionary<TEntity, ContextModelStatus>();
         _table = table;
         _builder = table.QueryBuilder;
-        _container = table.TransactionContainer;
+        _container = table.TransactionContainer ?? new DbTransactionContainer(_builder.DbConnector);
     }
 
     public void AddObject(TEntity? obj, ContextModelStatus status)
@@ -33,24 +33,24 @@ public class ChangesTracker<TEntity> where TEntity : class
         {
             if (kvp.Value == ContextModelStatus.Added)
             {
-                string query = _builder.AddEntity<TEntity>(_table.TableName, kvp.Key);
+                var command = _builder.AddEntity<TEntity>(_table.TableName, kvp.Key);
                 
-                _container.AddQuery(query);
+                _container.AddCommand(command);
             }
             else if (kvp.Value == ContextModelStatus.Removed)
             {
-                string query = _builder.RemoveEntity(_table.TableName, 
+                var command = _builder.RemoveEntity(_table.TableName, 
                                                   (int)(kvp.Key.GetType().GetPrimaryKeyInfo().GetValue(kvp.Key)));
-                _container.AddQuery(query);
+                _container.AddCommand(command);
             }
             else if (kvp.Value == ContextModelStatus.Got)
             {
                 var oldEntity = _builder.GetEntity<TEntity>(_table.TableName,
                                                          kvp.Key.GetPrimaryKeyValue());
-                var queries = _builder.UpdateEntity(_table.TableName, oldEntity, kvp.Key);
-                foreach (var query in queries)
+                var commands = _builder.UpdateEntity(_table.TableName, oldEntity, kvp.Key);
+                foreach (var command in commands)
                 {
-                    _container.AddQuery(query);
+                    _container.AddCommand(command);
                 }
             }
             else
