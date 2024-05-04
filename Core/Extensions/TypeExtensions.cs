@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
-using ORM_0._3.Core.Attributes;
-using ORM_0._3.Core.Enums;
+using ORM.Core.Attributes;
+using ORM.Core.Enums;
 
-namespace ORM_0._3.Core.Extensions;
+namespace ORM.Core.Extensions;
 
 internal static class TypeExtensions
 {

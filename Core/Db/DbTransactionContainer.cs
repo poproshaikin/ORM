@@ -1,9 +1,8 @@
 ﻿using System.Data.Common;
 using System.Data.SQLite;
-using ORM_0._3.Core.Enums;
-using ORM_0._3.Sqlite.Db;
+using ORM.Core.Enums;
 
-namespace ORM_0._3.Core.Db;
+namespace ORM.Core.Db;
 
 public class DbTransactionContainer
 {

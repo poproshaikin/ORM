@@ -1,7 +1,6 @@
-﻿using ORM_0._3.Core.Db;
-using ORM_0._3.Core.Enums;
+﻿using ORM.Core.Enums;
 
-namespace ORM_0._3.Core.Db;
+namespace ORM.Core.Db;
 
 public class DbTable<TEntity> : DbTableBase where TEntity : class
 {

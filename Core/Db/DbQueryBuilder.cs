@@ -1,8 +1,8 @@
 ﻿using System.Data.Common;
-using ORM_0._3.Core.Configurations;
-using ORM_0._3.Sqlite.Db;
+using ORM.Core.Configurations;
+using ORM.Sqlite.Db;
 
-namespace ORM_0._3.Core.Db;
+namespace ORM.Core.Db;
 
 public abstract class DbQueryBuilder
 {

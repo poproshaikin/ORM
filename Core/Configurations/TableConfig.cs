@@ -1,14 +1,15 @@
 ﻿using System.Data;
-using ORM_0._3.Core.Extensions;
+using ORM.Core.Extensions;
+using DbType = ORM.Core.Enums.DbType;
 
-namespace ORM_0._3.Core.Configurations;
+namespace ORM.Core.Configurations;
 
 public class TableConfig
 {
     public string Name;
     public List<ColumnConfig> Columns;
 
-    public static TableConfig Build(string tableName, Type entityType, ORM_0._3.Core.Enums.DbType dbType)
+    public static TableConfig Build(string tableName, Type entityType, DbType dbType)
     {
         if (!entityType.HasPrimaryKey()) throw new MissingPrimaryKeyException();
         

@@ -1,19 +1,17 @@
 ﻿using System.Data;
 using System.Data.Common;
 using System.Data.SQLite;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
-using System.Text.Json.Serialization;
 using Newtonsoft.Json;
-using ORM_0._3.Core.Attributes;
-using ORM_0._3.Core.Configurations;
-using ORM_0._3.Core.Db;
-using ORM_0._3.Core.Enums;
-using ORM_0._3.Core.Exceptions;
-using ORM_0._3.Core.Extensions;
+using ORM.Core.Extensions;
+using ORM.Core.Attributes;
+using ORM.Core.Configurations;
+using ORM.Core.Db;
+using ORM.Core.Enums;
+using ORM.Core.Exceptions;
 
-namespace ORM_0._3.Sqlite.Db;
+namespace ORM.Sqlite.Db;
 
 public class SqliteQueryBuilder : DbQueryBuilder
 {

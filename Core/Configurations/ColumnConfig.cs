@@ -1,10 +1,11 @@
 ﻿using System.Data;
 using System.Reflection;
-using ORM_0._3.Core.Attributes;
-using ORM_0._3.Core.Enums;
-using ORM_0._3.Core.Extensions;
+using ORM.Core.Extensions;
+using ORM.Core.Attributes;
+using ORM.Core.Enums;
+using DbType = ORM.Core.Enums.DbType;
 
-namespace ORM_0._3.Core.Configurations;
+namespace ORM.Core.Configurations;
 
 public class ColumnConfig
 {
@@ -13,7 +14,7 @@ public class ColumnConfig
     public DbConstraint[] Constraints;
     public ForeignKeyConfig? FkConfig;
     
-    public static ColumnConfig CreateModel(PropertyInfo info, ORM_0._3.Core.Enums.DbType dbType)
+    public static ColumnConfig CreateModel(PropertyInfo info, DbType dbType)
     {
         ArgumentNullException.ThrowIfNull(info);
 

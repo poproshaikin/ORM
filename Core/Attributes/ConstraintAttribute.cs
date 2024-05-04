@@ -1,6 +1,6 @@
-﻿using ORM_0._3.Core.Enums;
+﻿using ORM.Core.Enums;
 
-namespace ORM_0._3.Core.Attributes;
+namespace ORM.Core.Attributes;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class ConstraintAttribute : Attribute

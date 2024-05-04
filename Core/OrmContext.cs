@@ -1,10 +1,8 @@
-﻿using ORM_0._3.Core.Db;
-using ORM_0._3.Core.Enums;
-using System.Reflection;
-using ORM_0._3.Core.Configurations;
-using ORM_0._3.Core.Db;
+﻿using ORM.Core.Configurations;
+using ORM.Core.Db;
+using ORM.Core.Enums;
 
-namespace ORM_0._3.Core;
+namespace ORM.Core;
 
 public abstract class OrmContext
 {

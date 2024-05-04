@@ -1,4 +1,4 @@
-﻿namespace ORM_0._3.Core.Configurations;
+﻿namespace ORM.Core.Configurations;
 
 public class ForeignKeyConfig
 {

@@ -1,4 +1,4 @@
-﻿namespace ORM_0._3.Core.Enums;
+﻿namespace ORM.Core.Enums;
 
 public enum DbConstraint
 {

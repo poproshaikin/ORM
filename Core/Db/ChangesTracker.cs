@@ -1,7 +1,7 @@
-﻿using ORM_0._3.Core.Enums;
-using ORM_0._3.Core.Extensions;
+﻿using ORM.Core.Extensions;
+using ORM.Core.Enums;
 
-namespace ORM_0._3.Core.Db;
+namespace ORM.Core.Db;
 
 public class ChangesTracker<TEntity> where TEntity : class
 {

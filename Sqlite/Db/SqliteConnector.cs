@@ -1,10 +1,9 @@
 ﻿using System.Data.Common;
-using System.Data.Entity.Core.Common;
 using System.Data.SQLite;
-using ORM_0._3.Core.Db;
-using ORM_0._3.Core.Enums;
+using ORM.Core.Db;
+using DbType = ORM.Core.Enums.DbType;
 
-namespace ORM_0._3.Sqlite.Db;
+namespace ORM.Sqlite.Db;
 
 public class SqliteConnector : DbConnector
 {

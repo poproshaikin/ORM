@@ -1,4 +1,4 @@
-﻿namespace ORM_0._3.Core.Attributes;
+﻿namespace ORM.Core.Attributes;
 
 [AttributeUsage(AttributeTargets.Property)]
 public abstract class ForeignKeyAttributeBase : Attribute

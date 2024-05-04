@@ -1,4 +1,4 @@
-﻿namespace ORM_0._3.Core.Exceptions;
+﻿namespace ORM.Core.Exceptions;
 
 public class MissingTableException : Exception
 {
