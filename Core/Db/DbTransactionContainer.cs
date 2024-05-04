@@ -9,35 +9,32 @@ public class DbTransactionContainer
 {
     protected DbConnector Connector;
 
-    private List<string> _queries;
-    public IEnumerable<string> Queries => _queries;
+    private List<DbCommand> _commands;
+    public IEnumerable<DbCommand> Commands => _commands;
 
     public DbTransactionContainer(DbConnector connector)
     {
         ArgumentNullException.ThrowIfNull(connector);
         
         Connector = connector;
-        _queries = new List<string>();
+        _commands = new List<DbCommand>();
     }
 
-    public void AddQuery(string query)
+    public void AddCommand(DbCommand command)
     {
-        ArgumentNullException.ThrowIfNull(query);
+        ArgumentNullException.ThrowIfNull(command);
+        Connector.AssignConnectionToCmd(command);
         
-        _queries.Add(query);
+        _commands.Add(command);
     }
 
     public void Commit()
     {
         Connector.ExecuteTransaction(connection =>
         {
-            foreach (var query in _queries)
+            foreach (var cmd in _commands)
             {
-                var trans = connection.BeginTransaction();
-                
-                using var cmd = connection.CreateCommand();
-                cmd.CommandText = query;
-                cmd.ExecuteNonQuery();
+                Connector.ExecuteNonQuery(cmd);
             }
         });
     }
