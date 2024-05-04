@@ -27,13 +27,18 @@ public abstract class DbConnector
         ConnectionString = connectionString;
         this.OpenConnection();
     }
+
+    public void AssignConnectionToCmd(DbCommand command)
+    {
+        command.Connection = Connection;
+    }
     
     protected    abstract    void       OpenConnection();
     protected    abstract    void       ValidateConnectionString(string connectionString);
 
-    
     public       abstract    void       ExecuteTransaction(Action<DbConnection> trnsAct);
     public       abstract    object?    ExecuteScalar(string query);
+    public       abstract    void       ExecuteNonQuery(DbCommand command);
     public       abstract    void       ExecuteNonQuery(string query);
     public       abstract    void       ExecuteNonQuery(string query, Action<DbCommand> cmdAct);
     public       abstract    void       ExecuteReader(string query, Action<DbDataReader> rdrAct);
