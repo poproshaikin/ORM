@@ -13,7 +13,7 @@ using ORM.Core.Exceptions;
 
 namespace ORM.Sqlite.Db;
 
-public class SqliteQueryBuilder : DbQueryBuilder
+internal class SqliteQueryBuilder : DbQueryBuilder
 {
     public SqliteQueryBuilder(DbConnector connector) : base(connector)
     {
@@ -127,10 +127,10 @@ public class SqliteQueryBuilder : DbQueryBuilder
 
     public override DbCommand AddEntity<TEntity>(string tableName, TEntity entity)
     {
-        var properties = entity.GetType().GetDbProperties();
+        var properties = GetPropertiesWithNonDefaultPk(entity);
         
-        var columns = properties.Select(p => p.Name);
-        var parameterNames = columns.Select(col => $"@{col}").ToArray();
+        var columns = properties.Select(p => p.Name).ToList();
+        var parameterNames = columns.Select(col => $"@{col}").ToList();
         var values = properties.Select(p => p.GetValue(entity)).ToArray();
 
         var columnsJoin = string.Join(", ", columns);
@@ -247,6 +247,24 @@ public class SqliteQueryBuilder : DbQueryBuilder
 
             throw new MissingPrimaryKeyException();
         });
+    }
+    
+    /// <summary>
+    /// Returns all non virtual and primary key info if hasn't default value
+    /// </summary>
+    private static IEnumerable<PropertyInfo> GetPropertiesWithNonDefaultPk(object entity)
+    {
+        foreach (var prop in entity.GetType().GetProperties())
+        {
+            if (prop.IsPropertyVirtual()) continue;
+
+            if (prop.IsPrimaryKey())
+            {
+                if ((int)prop.GetValue(entity) == 0) continue;
+            }
+
+            yield return prop;
+        }
     }
 
     // protected override int GetPkLastValue(string tableName)
