@@ -1,6 +1,6 @@
 ﻿namespace ORM.Core.Enums;
 
-public enum ContextModelStatus
+internal enum ContextModelStatus
 {
     Added     = 1,
     Removed   = 2,
