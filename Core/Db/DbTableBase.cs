@@ -5,16 +5,21 @@ namespace ORM.Core.Db;
 
 public abstract class DbTableBase
 {
-    internal     string           TableName             { get; set; }
-    internal     DbQueryBuilder   QueryBuilder          { get; private set; }
-    protected    DbType           DbType                { get; private set; }
-    public DbTransactionContainer TransactionContainer { get; private set; }
+    internal     string         TableName       { get; set; }
+    internal     DbQueryBuilder QueryBuilder    { get; private set; }
+    protected    DbType         DbType          { get; private set; }
+    internal DbTransactionContainer Container   { get; private set; }
 
     protected DbTableBase()
     {
     }
 
+    /// <summary>
+    /// Инициализирует коллекцию из TEntity в унаследованных классах обьектами из базы данных
+    /// </summary>
+    internal abstract void InitCollection();
     internal abstract void InitChangesTracker();
+    public   abstract void SaveChanges();
     
     internal void SetQueryBuilder(DbQueryBuilder ex)
     {
@@ -33,7 +38,7 @@ public abstract class DbTableBase
     {
         ArgumentNullException.ThrowIfNull(container);
 
-        TransactionContainer = container;
+        Container = container;
     }
 
     internal bool Exists()
