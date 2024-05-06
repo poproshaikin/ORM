@@ -4,7 +4,7 @@ using ORM.Sqlite.Db;
 
 namespace ORM.Core.Db;
 
-public abstract class DbQueryBuilder
+internal abstract class DbQueryBuilder
 {
     protected DbConnector Connector { get; private set; }
     public DbConnector DbConnector => Connector;
