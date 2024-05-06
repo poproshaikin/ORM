@@ -1,11 +1,11 @@
 ﻿namespace ORM.Core.Attributes;
 
 [AttributeUsage(AttributeTargets.Property)]
-public class ForeignKeyAttribute<TRelated> : ForeignKeyAttributeBase
+public class ForeignKeyAttribute<TReferenced> : ForeignKeyAttributeBase
 {
-    public ForeignKeyAttribute(string relatedTableName,
+    public ForeignKeyAttribute(string referencedTableName,
         string lazyLoadingPropertyName)
-        : base(relatedTableName, 
+        : base(referencedTableName, 
             lazyLoadingPropertyName)
     {
     }
