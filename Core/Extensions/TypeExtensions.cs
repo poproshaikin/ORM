@@ -83,18 +83,21 @@ internal static class TypeExtensions
     /// <summary>
     /// Returns all PropertyInfo of the type that can be added to the database.
     /// </summary>
-    /// <returns>A collection of PropertyInfo that do not have a PrimaryKey constraint and are not virtual.</returns>
+    /// <returns>A collection of PropertyInfo that are not virtual.</returns>
     public static IEnumerable<PropertyInfo> GetDbProperties(this Type type)
     {
         return type.GetProperties()
-            .Where(p =>
-            {
-                if (p.IsPropertyVirtual()) return false;
+            .Where(p => !p.IsPropertyVirtual());
+    }
 
-                var attr = p.GetCustomAttribute<ConstraintAttribute>();
-                if (attr == null) return true;
-
-                return !attr.Constraints.Contains(DbConstraint.PrimaryKey);
-            });
+    /// <summary>
+    /// Sets value parameter to entity's property that has PrimaryKey constraint attribute
+    /// </summary>
+    /// <param name="entity">Entity what's primary key will be set</param>
+    /// <param name="value">Value so be assigned to primary key</param>
+    public static void SetPrimaryKeyValue<TEntity>(this TEntity entity, object value)
+    {
+        var pkInfo = typeof(TEntity).GetPrimaryKeyInfo();
+            pkInfo.SetValue(entity, value);
     }
 }
