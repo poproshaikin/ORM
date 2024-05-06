@@ -1,6 +1,7 @@
 ﻿using ORM.Core.Configurations;
 using ORM.Core.Db;
 using ORM.Core.Enums;
+using ORM.Core.Extensions;
 
 namespace ORM.Core;
 
@@ -10,7 +11,7 @@ public abstract class OrmContext
     protected abstract string ConnectionString { get; set; }
 
     private List<DbTableBase> _tables; 
-    private DbConnector Connector;
+    private DbConnector _connector;
     private DbTransactionContainer _container;
 
     protected OrmContext()
@@ -19,43 +20,86 @@ public abstract class OrmContext
             DbType == default)
             throw new NullReferenceException("ConnectionString or DbType properties in derived class cannot be uninitialized before using");
 
-        Connector = DbConnector.GetConnector(DbType);
-        Connector.OpenConnection(ConnectionString);
+        _connector = DbConnector.GetConnector(DbType);
+        _connector.OpenConnection(ConnectionString);
         
         _tables = new List<DbTableBase>();
-        _container = new DbTransactionContainer(Connector);
+        _container = new DbTransactionContainer(_connector);
 
         this.InitTables();
     }
 
+    /// <summary>
+    /// Initializes all properties of DbTable in a class inherited from this OrmContext
+    /// </summary>
     private void InitTables()
-    { 
+    {
+        foreach (var tableBase in this.GetAllTables())
+        {
+            tableBase.SetQueryBuilder(DbQueryBuilder.GetBuilder(_connector));
+            tableBase.InitChangesTracker();
+            
+            if (!tableBase.Exists())
+            {
+                var config = TableConfig.Build(tableBase.TableName, tableBase.GetType().GetGenericArguments()[0], DbType);
+                _container.AddCommand(tableBase
+                                      .QueryBuilder
+                                      .CreateTableIfNotExists(config));
+            }
+            else
+            {
+                tableBase.InitCollection();
+            }
+            
+            _tables.Add(tableBase);
+        }
+        
+        _container.Commit();
+    }
+
+    /// <summary>
+    /// Saves changes made to entities in the context during the session
+    /// </summary>
+    public void SaveChanges()
+    {
+        foreach (var table in _tables)
+        {
+            table.SaveChanges();
+        }
+    }
+
+    private IEnumerable<DbTableBase> GetAllTables()
+    {
         foreach (var prop in this.GetType().GetProperties())
         {
             if (!typeof(DbTableBase).IsAssignableFrom(prop.PropertyType))
                 continue;
 
-            var tableBase = (DbTableBase)Activator.CreateInstance(prop.PropertyType)!;
-            
-            tableBase.TableName = prop.Name;
+            var table = (DbTableBase)Activator.CreateInstance(prop.PropertyType)!;
+            table.TableName = prop.Name;
 
-            var config = TableConfig.Build(tableBase.TableName, prop.PropertyType.GetGenericArguments()[0], DbType);
+            prop.SetValue(this, table);
             
-            tableBase.SetQueryBuilder(DbQueryBuilder.GetBuilder(Connector));
-            tableBase.InitChangesTracker();
-
-            if (!tableBase.Exists())
-            {
-                _container.AddCommand(tableBase
-                                      .QueryBuilder
-                                      .CreateTableIfNotExists(config));
-            }
-            
-            _tables.Add(tableBase);
-            
-            prop.SetValue(this, tableBase);
+            yield return table;
         }
-        
-        _container.Commit();
     }
+
+    // private void GetDbColumns()
+    // {
+    //     var columnInfo = new DbColumnInfo()
+    //     {
+    //         Cid = _connector.
+    //     }
+    // }
+
+    // protected void TryUpdateTables()
+    // {
+    //     foreach (var tableBase in _tables)
+    //     {
+    //         var type = tableBase.GetType().GetGenericArguments()[0];
+    //
+    //         var props = type.GetDbProperties();
+    //         var cols = 
+    //     }
+    // }
 }
