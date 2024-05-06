@@ -3,7 +3,7 @@ using ORM.Core.Enums;
 
 namespace ORM.Core.Db;
 
-public class ChangesTracker<TEntity> where TEntity : class
+internal class ChangesTracker<TEntity> where TEntity : class
 {
     private Dictionary<TEntity, ContextModelStatus> _changes;
     private DbTableBase _table;
@@ -15,7 +15,7 @@ public class ChangesTracker<TEntity> where TEntity : class
         _changes = new Dictionary<TEntity, ContextModelStatus>();
         _table = table;
         _builder = table.QueryBuilder;
-        _container = table.TransactionContainer ?? new DbTransactionContainer(_builder.DbConnector);
+        _container = table.Container ?? new DbTransactionContainer(_builder.DbConnector);
     }
 
     public void AddObject(TEntity? obj, ContextModelStatus status)
