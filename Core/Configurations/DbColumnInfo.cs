@@ -2,7 +2,7 @@
 
 namespace ORM.Core.Configurations;
 
-public class DbColumnInfo
+internal class DbColumnInfo
 {
     public int Cid { get; set; }
     public string Name { get; set; }

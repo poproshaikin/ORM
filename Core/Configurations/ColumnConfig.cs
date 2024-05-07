@@ -7,7 +7,7 @@ using DbType = ORM.Core.Enums.DbType;
 
 namespace ORM.Core.Configurations;
 
-public class ColumnConfig
+internal class ColumnConfig
 {
     public string Name;
     public DbDataType DataType;
@@ -21,12 +21,15 @@ public class ColumnConfig
         var model = new ColumnConfig()
         {
             Name = info.Name,
-            DataType = EnumsConverter.GetDataType(info.PropertyType),
+            DataType = EnumsConverter.GetDataType(info.PropertyType, dbType),
             Constraints = Array.Empty<DbConstraint>()
         };
 
         if (info.GetCustomAttribute(typeof(ConstraintAttribute)) is ConstraintAttribute cnsAtr)
         {
+            if (info.IsPrimaryKey() && EnumsConverter.IsPrimaryKeyTypeValid(model.DataType, dbType))
+                throw new InvalidCastException($"Primary key cannot be ov type {info.PropertyType}");
+            
             model.Constraints = cnsAtr.Constraints.ToArray();
         }
         else if (info.GetCustomAttribute(typeof(ForeignKeyAttributeBase)) is ForeignKeyAttributeBase fkAtr)

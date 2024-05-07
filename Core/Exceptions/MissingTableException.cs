@@ -1,6 +1,6 @@
 ﻿namespace ORM.Core.Exceptions;
 
-public class MissingTableException : Exception
+internal class MissingTableException : Exception
 {
    private string _tableName;
 

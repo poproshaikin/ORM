@@ -4,7 +4,7 @@ using DbType = ORM.Core.Enums.DbType;
 
 namespace ORM.Core.Configurations;
 
-public class TableConfig
+internal class TableConfig
 {
     public string Name;
     public List<ColumnConfig> Columns;

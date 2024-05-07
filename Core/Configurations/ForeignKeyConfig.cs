@@ -1,6 +1,6 @@
 ﻿namespace ORM.Core.Configurations;
 
-public class ForeignKeyConfig
+internal class ForeignKeyConfig
 {
     public string ReferencedTableName;
     public string ForeignKeyColName;

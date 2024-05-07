@@ -5,7 +5,7 @@ using DbType = ORM.Core.Enums.DbType;
 
 namespace ORM.Sqlite.Db;
 
-public class SqliteConnector : DbConnector
+internal class SqliteConnector : DbConnector
 {
     public SqliteConnector() : base()
     {
